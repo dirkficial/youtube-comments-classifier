@@ -58,7 +58,8 @@ def get_video_comments(video_id):
                             # break
                         comments.append({
                             "reply_text" : reply_details['textOriginal'],
-                            "like_count" : reply_details['likeCount']
+                            "like_count" : reply_details['likeCount'],
+                            "reply_count" : 0
                             })
 
             # next_page_token = response.get("nextPageToken")
@@ -73,10 +74,11 @@ def get_video_comments(video_id):
 
     return comments
 
-def save_comments():
-    return
+# save comments in a database
+def save_comments(comments):
+    comments_df = pd.DataFrame(comments)
+    comments_df.to_csv("./output/results.csv", index=False, encoding="utf-8-sig")
+    print(f"Saved {len(comments)} to results.csv")
 
-
-def load_existing_comments():
-    return
+save_comments(get_video_comments(parse_video_id("https://www.youtube.com/watch?v=Ud5nv8CIZiM&t=4780s")))
 
