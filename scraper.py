@@ -33,7 +33,8 @@ def get_video_comments(video_id):
 
     next_page_token = None
     comments = []
-    
+    channelID = get_channel_id(video_id)
+
     while True:
         try: 
             request = youtube.commentThreads().list(
@@ -48,8 +49,8 @@ def get_video_comments(video_id):
 
             for item in response['items']:
                 comment_details = item['snippet']['topLevelComment']['snippet']
-                # if comment_details['authorDisplayName'] is equal to channel owner:
-                    # break
+                if comment_details['authorChannelId']['value'] == channelID:
+                    continue
                 
                 comments.append({
                     "comment_text" : comment_details['textOriginal'],
@@ -60,8 +61,8 @@ def get_video_comments(video_id):
                 if item.get('replies'):
                     for reply in item['replies']['comments']:
                         reply_details = reply['snippet']
-                        # if reply_details['authorDisplayName'] is equal to channel owner:
-                            # break
+                        if reply_details['authorChannelId']['value'] == channelID:
+                            continue
                         comments.append({
                             "comment_text" : reply_details['textOriginal'],
                             "like_count" : reply_details['likeCount'],
@@ -87,18 +88,19 @@ def get_video_comments(video_id):
     return comments
 
 video_id = parse_video_id("https://www.youtube.com/watch?v=XcoFHz5i8T0&t=47s")
-# print(video_id)
-# video_comments = get_video_comments(video_id)
-# print(video_comments)
+print(video_id)
+video_comments = get_video_comments(video_id)
+print(video_comments)
 
-request = youtube.commentThreads().list(
-                part = "snippet, replies",
-                videoId = video_id,
-                maxResults = 5,
-                pageToken = None,
-                textFormat = "plainText"
-            )
+# request = youtube.commentThreads().list(
+#                 part = "snippet, replies",
+#                 videoId = video_id,
+#                 maxResults = 5,
+#                 pageToken = None,
+#                 textFormat = "plainText"
+#             )
 
-response = request.execute()
+# response = request.execute()
 
-print(json.dumps(response, indent=4))
+# print(json.dumps(response, indent=4))
+# print(get_channel_id(video_id))
