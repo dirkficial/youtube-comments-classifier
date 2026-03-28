@@ -21,6 +21,13 @@ def parse_video_id(url):
     query_dict = parse_qs(parsed_url.query)
     return query_dict['v'][0]
         
+def get_channel_id(video_id):
+    request = youtube.videos().list(
+        part="snippet",
+        id=video_id
+    )
+    response = request.execute()
+    return response['items'][0]['snippet']['channelId']
 
 def get_video_comments(video_id):
 
