@@ -1,10 +1,8 @@
 from dotenv import load_dotenv
-import requests
 import os
 import time
-import pandas as pd
 from googleapiclient.discovery import build
-import isodate
+from googleapiclient.errors import HttpError
 from urllib.parse import urlparse, parse_qs
 import json
 
@@ -34,7 +32,7 @@ def get_video_comments(video_id):
             request = youtube.commentThreads().list(
                 part = "snippet, replies",
                 videoId = video_id,
-                maxResults = 5,
+                maxResults = 100,
                 pageToken = next_page_token,
                 textFormat = "plainText"
             )
@@ -51,34 +49,49 @@ def get_video_comments(video_id):
                     "like_count" : comment_details['likeCount'],
                     "reply_count" : item['snippet'].get('totalReplyCount', 0)
                     })
+                
                 if item.get('replies'):
                     for reply in item['replies']['comments']:
                         reply_details = reply['snippet']
                         # if reply_details['authorDisplayName'] is equal to channel owner:
                             # break
                         comments.append({
-                            "reply_text" : reply_details['textOriginal'],
+                            "comment_text" : reply_details['textOriginal'],
                             "like_count" : reply_details['likeCount'],
                             "reply_count" : 0
                             })
 
-            # next_page_token = response.get("nextPageToken")
+            next_page_token = response.get("nextPageToken")
 
             if not next_page_token:
                 break
 
-            time.sleep(1)
+        except HttpError as e:
+            if e.resp.status == 429:
+                print("Rate limit hit, waiting 5 seconds...")
+                time.sleep(5)
+            else:
+                print(f"Oops! There was an error trying to fetch comments for {video_id}: {e}")
+                break
         except Exception as e:
             print(f"Oops! There was an error trying to fetch comments for {video_id}: {e}")
             break
 
     return comments
 
-# save comments in a database
-def save_comments(comments):
-    comments_df = pd.DataFrame(comments)
-    comments_df.to_csv("./output/results.csv", index=False, encoding="utf-8-sig")
-    print(f"Saved {len(comments)} to results.csv")
+video_id = parse_video_id("https://www.youtube.com/watch?v=XcoFHz5i8T0&t=47s")
+# print(video_id)
+# video_comments = get_video_comments(video_id)
+# print(video_comments)
 
-save_comments(get_video_comments(parse_video_id("https://www.youtube.com/watch?v=Ud5nv8CIZiM&t=4780s")))
+request = youtube.commentThreads().list(
+                part = "snippet, replies",
+                videoId = video_id,
+                maxResults = 5,
+                pageToken = None,
+                textFormat = "plainText"
+            )
 
+response = request.execute()
+
+print(json.dumps(response, indent=4))
