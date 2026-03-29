@@ -4,6 +4,8 @@ from google import genai
 import warnings
 import json
 
+from scraper import video_comments
+
 warnings.filterwarnings("ignore")
 
 import pandas as pd
@@ -34,18 +36,18 @@ def classify_comments(comments):
         
         prompt = f"""Classify each YouTube comment as POSITIVE, NEGATIVE, or GARBAGE.
         - POSITIVE: constructive feedback praising something specific
-        - NEGATIVE: constructive feedback criticizing something specific  
+        - NEGATIVE: constructive feedback criticizing something specific
         - GARBAGE: spam, memes, "first!", emoji-only, off-topic, generic praise with no detail
 
+        Comments:
+        {comments_text}
         Respond in JSON format only, no other text:
             [
                 {{"index": 1, "category": "POSITIVE", "summary": "one sentence summary"}}
             ]
+            """
 
-        Comments:
-        {comments_text}"""
-
-        response = client.generate_content(
+        response = client.models.generate_content(
             model = MODEL_ID,
             contents = prompt,
             config = GenerateContentConfig(
@@ -53,8 +55,6 @@ def classify_comments(comments):
             )
         )
         
-        print(response)
-
         try:
             text = response.text.strip()
             text = text.replace("```json", "").replace("```", "").strip()

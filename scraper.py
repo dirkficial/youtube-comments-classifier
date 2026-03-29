@@ -113,20 +113,3 @@ def get_video_comments(video_id):
             break
 
     return comments
-
-# video_id = parse_video_id("https://www.youtube.com/watch?v=XcoFHz5i8T0&t=47s")
-# print(video_id)
-# video_comments = get_video_comments(video_id)
-# print(len(video_comments))
-
-# # # request = youtube.commentThreads().list(
-# # #                 part = "snippet, replies",
-# # #                 videoId = video_id,
-# # #                 maxResults = 5,
-# # #                 pageToken = None,
-# # #                 textFormat = "plainText"
-# # #             )
-
-# # # response = request.execute()
-
-# # # print(json.dumps(response, indent=4))
