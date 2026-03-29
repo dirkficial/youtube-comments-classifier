@@ -4,8 +4,6 @@ from google import genai
 import warnings
 import json
 
-from scraper import video_comments
-
 warnings.filterwarnings("ignore")
 
 import pandas as pd

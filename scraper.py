@@ -4,7 +4,6 @@ import time
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from urllib.parse import urlparse, parse_qs
-import json
 
 load_dotenv()
 
