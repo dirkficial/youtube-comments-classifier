@@ -1,23 +1,21 @@
 import os
 from dotenv import load_dotenv
 from google import genai
-import vertexai
 import warnings
 import json
 
 warnings.filterwarnings("ignore")
 
 import pandas as pd
-from vertexai.generative_models import GenerationConfig, GenerativeModel
+from google.genai.types import GenerateContentConfig, Part
 
 load_dotenv()
-PROJECT_ID = str(os.getenv("GOOGLE_CLOUD_PROJECT"))
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-vertexai.init(project=os.getenv("PROJECT_ID"), location=os.getenv("LOCATION_ID"))
 
-generation_model = GenerativeModel("gemini-2.5-flash")
-generation_config = GenerationConfig(temperature=0.1, max_output_tokens=256)
+PROJECT_ID = str(os.environ.get("PROJECT_ID"))
+LOCATION = str(os.environ.get("LOCATION"))
+MODEL_ID = "gemini-2.5-flash"  # @param {type: "string"}
 
+client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
 
 def classify_comments(comments):
     results = []
@@ -47,12 +45,16 @@ def classify_comments(comments):
         Comments:
         {comments_text}"""
 
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            generation_config = generation_config,
-            contents=prompt
+        response = client.generate_content(
+            model = MODEL_ID,
+            contents = prompt,
+            config = GenerateContentConfig(
+                response_modalities=['TEXT']
+            )
         )
         
+        print(response)
+
         try:
             text = response.text.strip()
             text = text.replace("```json", "").replace("```", "").strip()

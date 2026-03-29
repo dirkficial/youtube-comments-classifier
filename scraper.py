@@ -29,6 +29,37 @@ def get_channel_id(video_id):
     response = request.execute()
     return response['items'][0]['snippet']['channelId']
 
+def get_all_replies(parent_id, channel_id):
+    replies = []
+    reply_page_token = None
+
+    while True:
+        request = youtube.comments().list(
+            part = "snippet",
+            parentId = parent_id,
+            maxResults = 100,
+            pageToken = reply_page_token,
+            textFormat = "plainText"
+        )
+
+        response = request.execute()
+
+        for reply in response['items']:
+            details = reply['snippet']
+            if details['authorChannelId']['value'] == channel_id:
+                continue
+            replies.append({
+                "comment_text": details['textOriginal'],
+                "like_count": details['likeCount'],
+                "reply_count": 0
+            })
+
+        reply_page_token = response.get('nextPageToken')
+        if not reply_page_token:
+            break
+
+    return replies
+
 def get_video_comments(video_id):
 
     next_page_token = None
@@ -58,16 +89,11 @@ def get_video_comments(video_id):
                     "reply_count" : item['snippet'].get('totalReplyCount', 0)
                     })
                 
-                if item.get('replies'):
-                    for reply in item['replies']['comments']:
-                        reply_details = reply['snippet']
-                        if reply_details['authorChannelId']['value'] == channelID:
-                            continue
-                        comments.append({
-                            "comment_text" : reply_details['textOriginal'],
-                            "like_count" : reply_details['likeCount'],
-                            "reply_count" : 0
-                            })
+                if item['snippet'].get('totalReplyCount', 0) > 0:
+                    comments.extend(get_all_replies(
+                        item['snippet']['topLevelComment']['id'],
+                        channelID
+                    ))
 
             next_page_token = response.get("nextPageToken")
 
@@ -78,6 +104,7 @@ def get_video_comments(video_id):
             if e.resp.status == 429:
                 print("Rate limit hit, waiting 5 seconds...")
                 time.sleep(5)
+                continue
             else:
                 print(f"Oops! There was an error trying to fetch comments for {video_id}: {e}")
                 break
@@ -87,20 +114,19 @@ def get_video_comments(video_id):
 
     return comments
 
-video_id = parse_video_id("https://www.youtube.com/watch?v=XcoFHz5i8T0&t=47s")
-print(video_id)
-video_comments = get_video_comments(video_id)
-print(video_comments)
+# video_id = parse_video_id("https://www.youtube.com/watch?v=XcoFHz5i8T0&t=47s")
+# print(video_id)
+# video_comments = get_video_comments(video_id)
+# print(len(video_comments))
 
-# request = youtube.commentThreads().list(
-#                 part = "snippet, replies",
-#                 videoId = video_id,
-#                 maxResults = 5,
-#                 pageToken = None,
-#                 textFormat = "plainText"
-#             )
+# # # request = youtube.commentThreads().list(
+# # #                 part = "snippet, replies",
+# # #                 videoId = video_id,
+# # #                 maxResults = 5,
+# # #                 pageToken = None,
+# # #                 textFormat = "plainText"
+# # #             )
 
-# response = request.execute()
+# # # response = request.execute()
 
-# print(json.dumps(response, indent=4))
-# print(get_channel_id(video_id))
+# # # print(json.dumps(response, indent=4))
