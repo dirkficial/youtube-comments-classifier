@@ -7,7 +7,7 @@ import json
 warnings.filterwarnings("ignore")
 
 import pandas as pd
-from google.genai.types import GenerateContentConfig, Part
+from google.genai.types import GenerateContentConfig
 
 load_dotenv()
 
