@@ -14,7 +14,7 @@ class CommentResult(BaseModel):
 class AnalyzeResponse(BaseModel):
     video_id: str
     total_comments: str | None = None
-    positive: int | None = None
-    negative: int | None = None
-    garbage: int | None = None
+    actionable: int | None = None
+    supportive: int | None = None
+    irrelevant: int | None = None
     comments: list[CommentResult]

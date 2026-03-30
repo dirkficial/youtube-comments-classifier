@@ -32,16 +32,16 @@ def classify_comments(comments):
         for j, comment in enumerate(batch):
             comments_text += f'{j+1}. "{comment["comment_text"]}" (Likes: {comment["like_count"]})\n'
         
-        prompt = f"""Classify each YouTube comment as POSITIVE, NEGATIVE, or GARBAGE.
-        - POSITIVE: constructive feedback praising something specific
-        - NEGATIVE: constructive feedback criticizing something specific
-        - GARBAGE: spam, memes, "first!", emoji-only, off-topic, generic praise with no detail
+        prompt = f"""Classify each YouTube comment as ACTIONABLE, SUPPORTIVE, or IRRELEVANT.
+        - ACTIONABLE: specific feedback the creator can act on, whether positive or negative (e.g. "The audio is too quiet after the intro", "The explanation at 3:20 really helped me understand promises")
+        - SUPPORTIVE: positive engagement but nothing specific to act on (e.g. "Great video!", "Thanks so much", "Love your content")
+        - IRRELEVANT: doesn't relate to the content or provide any value — spam, memes, "first!", off-topic arguments, self-promotion
 
         Comments:
         {comments_text}
         Respond in JSON format only, no other text:
             [
-                {{"index": 1, "category": "POSITIVE", "summary": "one sentence summary"}}
+                {{"index": 1, "category": "ACTIONABLE", "summary": "one sentence summary"}}
             ]
             """
 
