@@ -12,13 +12,14 @@ youtube = build("youtube", "v3", developerKey=API_KEY)
 
 # Gets video id from youtube url
 def parse_video_id(url):
-
-    # parses url into different parts
     parsed_url = urlparse(url)
-    
-    # returns dictionary with keys v and t
+
+    # Handle youtu.be short URLs
+    if parsed_url.netloc == "youtu.be":
+        return parsed_url.path.lstrip("/") or None
+
     query_dict = parse_qs(parsed_url.query)
-    return query_dict['v'][0]
+    return query_dict.get('v', [None])[0]
         
 def get_channel_id(video_id):
     request = youtube.videos().list(
@@ -26,7 +27,10 @@ def get_channel_id(video_id):
         id=video_id
     )
     response = request.execute()
-    return response['items'][0]['snippet']['channelId']
+    items = response.get('items', [])
+    if not items:
+        return None
+    return items[0]['snippet']['channelId']
 
 def get_all_replies(parent_id, channel_id):
     replies = []
@@ -64,6 +68,9 @@ def get_video_comments(video_id):
     next_page_token = None
     comments = []
     channelID = get_channel_id(video_id)
+
+    if channelID is None:
+        return comments
 
     while True:
         try: 
