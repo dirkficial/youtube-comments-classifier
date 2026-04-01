@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from datetime import datetime
 
 class AnalyzeRequest(BaseModel):
     url: str
@@ -18,3 +19,35 @@ class AnalyzeResponse(BaseModel):
     supportive: int | None = None
     irrelevant: int | None = None
     comments: list[CommentResult]
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    created_at: datetime
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+
+class AnalyzeResponse(BaseModel):
+    video_id: str
+    total_comments: int
+    actionable: int
+    supportive: int
+    irrelevant: int
+    comments: list[CommentResult]
+
+class AnalysisSummary(BaseModel):
+    id: int
+    video_id: str
+    video_title: str | None
+    total_comments: int
+    analyzed_at: datetime
