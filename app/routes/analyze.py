@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
-from app.scraper import (parse_video_id, get_video_comments)
-from app.classifier import classify_comments
+from scraper import (parse_video_id, get_video_comments)
+from classifier import classify_comments
 from schemas import (AnalyzeRequest, AnalyzeResponse)
 
 
-router = APIRouter(prefix="/api/analyze", tags=["analze"])
+router = APIRouter(prefix="/api/analyze", tags=["analyze"])
 
 # Creates analysis of a video
-@router.post("/api/analyze")
+@router.post("/")
 async def analyze_video(request: AnalyzeRequest):
     try: 
         video_id = parse_video_id(request.url)
@@ -19,11 +19,12 @@ async def analyze_video(request: AnalyzeRequest):
         raise HTTPException(status_code=404, detail="Comments not found!")
     
     results = classify_comments(video_comments)
-    
-    AnalyzeResponse(
+
+    return AnalyzeResponse(
         video_id=video_id,
-        total_comments=video_comments,
+        total_comments=len(video_comments),
+        actionable=sum(1 for r in results if r["category"] == "ACTIONABLE"),
+        supportive=sum(1 for r in results if r["category"] == "SUPPORTIVE"),
+        irrelevant=sum(1 for r in results if r["category"] == "IRRELEVANT"),
         comments=results
     )
-
-    return {"results" : results}
