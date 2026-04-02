@@ -12,14 +12,6 @@ class CommentResult(BaseModel):
     summary: str
     importance: str
 
-class AnalyzeResponse(BaseModel):
-    video_id: str
-    total_comments: int | None = None
-    actionable: int | None = None
-    supportive: int | None = None
-    irrelevant: int | None = None
-    comments: list[CommentResult]
-
 class UserResponse(BaseModel):
     id: int
     email: str
