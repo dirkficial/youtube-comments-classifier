@@ -22,6 +22,7 @@ Each comment also gets a one-sentence summary and an importance score (HIGH / ME
 | Comment scraping | YouTube Data API v3 |
 | Validation | Pydantic v2 |
 | Runtime | Python 3.12, Uvicorn |
+| Containerization | Docker, Docker Compose |
 
 ## Project Structure
 
@@ -82,8 +83,6 @@ Health check returns `{ "status": "ok" }`.
 ## Setup
 
 ### Prerequisites
-- Python 3.12+
-- PostgreSQL
 - Google Cloud project with Vertex AI enabled
 - YouTube Data API v3 key
 
@@ -96,10 +95,28 @@ YT_API_KEY=your_youtube_data_api_key
 GEMINI_API_KEY=your_gemini_api_key
 PROJECT_ID=your_gcp_project_id
 LOCATION=us-central1
-DATABASE_URL=postgresql://user:password@localhost/dbname
+DATABASE_URL=postgresql://postgres:password@db:5432/youtubedb
 ```
 
-### Install & Run
+### Run with Docker (recommended)
+
+The app runs as two containers — the FastAPI server and a PostgreSQL 16 database — managed by Docker Compose. The database password is read from `db/password.txt` as a Docker secret.
+
+1. Create the password file:
+   ```bash
+   mkdir -p db && echo "your_db_password" > db/password.txt
+   ```
+
+2. Start the services:
+   ```bash
+   docker compose up --build
+   ```
+
+The server starts at `http://localhost:8000`. Interactive API docs are available at `http://localhost:8000/docs`.
+
+### Run locally (without Docker)
+
+Additional prerequisites: Python 3.12+, PostgreSQL
 
 ```bash
 python -m venv venv
@@ -108,8 +125,6 @@ pip install -r requirements.txt
 
 uvicorn app.main:app --reload
 ```
-
-The server starts at `http://localhost:8000`. Interactive API docs are available at `http://localhost:8000/docs`.
 
 ## Data Model
 
