@@ -11,11 +11,11 @@ from google.genai.types import GenerateContentConfig
 
 load_dotenv()
 
-PROJECT_ID = str(os.environ.get("PROJECT_ID"))
-LOCATION = str(os.environ.get("LOCATION"))
+# PROJECT_ID = str(os.environ.get("PROJECT_ID"))
+# LOCATION = str(os.environ.get("LOCATION"))
 MODEL_ID = "gemini-2.5-flash"  # @param {type: "string"}
 
-client = genai.Client(vertexai=True, project=PROJECT_ID, location=LOCATION)
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def classify_comments(comments):
     results = []
